@@ -73,6 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: _centerMapOnLocation,
               tooltip: 'Center on Location',
               child: const Icon(Icons.location_on),
+
             ),
           ],
         ),
