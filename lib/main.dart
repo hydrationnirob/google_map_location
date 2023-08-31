@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
-
 void main() {
   runApp(const MyApp());
 }
@@ -38,6 +37,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<LatLng> _polylineCoordinates = [];
   final Location _location = Location();
   Set<Marker> _markers = {};
+  LatLng? _lastKnownLocation;
 
   @override
   Widget build(BuildContext context) {
@@ -62,18 +62,15 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         markers: _markers,
       ),
-
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(45.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             FloatingActionButton(
-
               onPressed: _centerMapOnLocation,
               tooltip: 'Center on Location',
               child: const Icon(Icons.location_on),
-
             ),
           ],
         ),
@@ -87,14 +84,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _centerMapOnLocation() async {
-    if (_polylineCoordinates.isNotEmpty) {
-      final lastLocation = _polylineCoordinates.last;
-      _controller?.animateCamera(CameraUpdate.newLatLngZoom(lastLocation, 40));
+    if (_lastKnownLocation != null) {
+      _controller?.animateCamera(CameraUpdate.newLatLngZoom(_lastKnownLocation!, 40));
     }
 
     bool serviceEnabled;
     PermissionStatus permission;
-
 
     serviceEnabled = await _location.serviceEnabled();
     if (!serviceEnabled) {
@@ -104,7 +99,6 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
 
-
     permission = await _location.hasPermission();
     if (permission == PermissionStatus.denied) {
       permission = await _location.requestPermission();
@@ -112,33 +106,41 @@ class _MyHomePageState extends State<MyHomePage> {
         return;
       }
     }
-
   }
-
 
   Future<void> _getLocationAndDrawPolyline() async {
     await _centerMapOnLocation();
 
     _location.onLocationChanged.listen((locationData) {
       LatLng latLng = LatLng(locationData.latitude!, locationData.longitude!);
+
+      if (_lastKnownLocation != null) {
+        _polylineCoordinates.add(_lastKnownLocation!);
+      }
+      _polylineCoordinates.add(latLng);
+
       setState(() {
-        _polylineCoordinates.add(latLng);
-
-
-        _markers.clear();
-        _markers.add(
-          Marker(
-            markerId: const MarkerId('marker1'),
-            position: latLng,
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-            infoWindow:  InfoWindow(title: 'My current location $latLng'),
-          ),
-        );
+        _lastKnownLocation = latLng;
       });
 
       _controller?.animateCamera(CameraUpdate.newLatLngZoom(latLng, 18));
     });
-  }
 
+    // Add the marker here, outside the listener
+    LatLng initialLocation = await _location.getLocation().then(
+          (locationData) => LatLng(locationData.latitude!, locationData.longitude!),
+    );
+
+    setState(() {
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('marker1'),
+          position: initialLocation,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          infoWindow:  InfoWindow(title: 'My current location $initialLocation'),
+        ),
+      );
+    });
+  }
 
 }
