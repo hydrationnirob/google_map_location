@@ -1,16 +1,6 @@
 # google_map_location
 
-A new Flutter project.
+![image](https://github.com/hydrationnirob/google_map_location/assets/52385810/aaa1ae47-4c99-48a6-9a9f-1f0a5d5bc236)
 
-## Getting Started
+![image](https://github.com/hydrationnirob/google_map_location/assets/52385810/1632b8a6-c740-4da4-9150-8d59f620cf80)
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
